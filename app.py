@@ -3,6 +3,24 @@ import pandas as pd
 import requests
 import json
 import matplotlib.pyplot as plt
+import matplotlib.font_manager as fm
+import platform
+
+# 🔹 Matplotlib 한글 폰트 설정 함수
+def set_korean_font():
+    system_name = platform.system()
+    if system_name == "Windows":
+        font_path = "C:/Windows/Fonts/malgun.ttf"  # Windows (맑은 고딕)
+    elif system_name == "Darwin":  # macOS
+        font_path = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
+    else:  # Linux (Google Colab 등)
+        font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
+
+    font_name = fm.FontProperties(fname=font_path).get_name()
+    plt.rc("font", family=font_name)  # Matplotlib에 적용
+
+# 한글 폰트 적용
+set_korean_font()
 
 # 🔹 config.json 파일에서 데이터 불러오기
 def load_config():
@@ -63,12 +81,16 @@ if st.button("데이터 가져오기"):
         fig, ax = plt.subplots(figsize=(8, 4))
         ax.bar(commits_by_author["Author"], commits_by_author["Commit Count"], color="blue")
         plt.xticks(rotation=45)
+        plt.xlabel("사용자")
+        plt.ylabel("커밋 수")
+        plt.title("사용자별 커밋 기여도")
         st.pyplot(fig)
 
         # 📌 📊 시각화 2: 기여도 파이 차트
         st.subheader("👥 사용자별 기여도 비율")
         fig, ax = plt.subplots(figsize=(5, 5))
         ax.pie(commits_by_author["Commit Count"], labels=commits_by_author["Author"], autopct="%1.1f%%", startangle=90)
+        plt.title("사용자별 기여도")
         st.pyplot(fig)
 
     else:
