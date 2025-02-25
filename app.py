@@ -2,6 +2,7 @@ import streamlit as st
 import pandas as pd
 import requests
 import json
+import matplotlib.pyplot as plt
 
 # 🔹 config.json 파일에서 데이터 불러오기
 def load_config():
@@ -33,12 +34,34 @@ if st.button("데이터 가져오기"):
     response = requests.get(url, headers=headers)
     if response.status_code == 200:
         commits = response.json()
+
+        # 📌 커밋 데이터 가공
         df = pd.DataFrame([
             {"SHA": c["sha"], "Author": c["commit"]["author"]["name"], "Date": c["commit"]["author"]["date"], "Message": c["commit"]["message"]}
             for c in commits
         ])
-        df["Date"] = pd.to_datetime(df["Date"]).dt.date
+        df["Date"] = pd.to_datetime(df["Date"]).dt.date  # 날짜 형식 변환
+
+        # 📝 최근 커밋 내역 출력
         st.subheader(f"📝 최근 커밋 내역 ({repo_owner}/{repo_name})")
-        st.dataframe(df)  # 결과 표시
+        st.dataframe(df)
+
+        # 📊 사용자별 커밋 수 집계
+        commits_by_author = df["Author"].value_counts().reset_index()
+        commits_by_author.columns = ["Author", "Commit Count"]
+
+        # 📌 📊 시각화 1: 사용자별 커밋 횟수 막대 그래프
+        st.subheader("📊 사용자별 커밋 횟수")
+        fig, ax = plt.subplots(figsize=(8, 4))
+        ax.bar(commits_by_author["Author"], commits_by_author["Commit Count"], color="blue")
+        plt.xticks(rotation=45)
+        st.pyplot(fig)
+
+        # 📌 📊 시각화 2: 기여도 파이 차트
+        st.subheader("👥 사용자별 기여도 비율")
+        fig, ax = plt.subplots(figsize=(5, 5))
+        ax.pie(commits_by_author["Commit Count"], labels=commits_by_author["Author"], autopct="%1.1f%%", startangle=90)
+        st.pyplot(fig)
+
     else:
         st.error(f"GitHub API 요청 실패: {response.status_code}")
