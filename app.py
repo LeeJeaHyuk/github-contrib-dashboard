@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 
 # 🔹 config.json 파일에서 데이터 불러오기
 def load_config():
-    with open("config.json", "r") as f:
+    with open("config.json", "r", encoding="utf-8") as f:
         return json.load(f)
 
 config = load_config()  # 설정 파일 로드
@@ -32,12 +32,20 @@ if st.button("데이터 가져오기"):
     headers = {"Authorization": f"token {token}"} if token else {}
 
     response = requests.get(url, headers=headers)
+    response.encoding = "utf-8"  # 🔹 UTF-8 인코딩 설정
+
     if response.status_code == 200:
-        commits = response.json()
+        data = response.content.decode("utf-8")  # 🔹 UTF-8로 강제 디코딩
+        commits = json.loads(data)  # JSON 파싱
 
         # 📌 커밋 데이터 가공
         df = pd.DataFrame([
-            {"SHA": c["sha"], "Author": c["commit"]["author"]["name"], "Date": c["commit"]["author"]["date"], "Message": c["commit"]["message"]}
+            {
+                "SHA": c["sha"],
+                "Author": c["commit"]["author"]["name"],  # 한글 처리됨
+                "Date": c["commit"]["author"]["date"],
+                "Message": c["commit"]["message"]
+            }
             for c in commits
         ])
         df["Date"] = pd.to_datetime(df["Date"]).dt.date  # 날짜 형식 변환
