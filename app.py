@@ -5,19 +5,7 @@ import json
 import matplotlib.pyplot as plt
 import matplotlib.font_manager as fm
 import platform
-
-# 🔹 Matplotlib 한글 폰트 설정 함수
-def set_korean_font():
-    system_name = platform.system()
-    if system_name == "Windows":
-        font_path = "C:/Windows/Fonts/malgun.ttf"  # Windows (맑은 고딕)
-    elif system_name == "Darwin":  # macOS
-        font_path = "/System/Library/Fonts/Supplemental/AppleGothic.ttf"
-    else:  # Linux (Google Colab 등)
-        font_path = "/usr/share/fonts/truetype/nanum/NanumGothic.ttf"
-
-    font_name = fm.FontProperties(fname=font_path).get_name()
-    plt.rc("font", family=font_name)  # Matplotlib에 적용
+from font_utils import set_korean_font  # 🔹 외부 파일에서 함수 가져오기
 
 # 한글 폰트 적용
 set_korean_font()
